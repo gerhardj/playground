@@ -4,8 +4,8 @@ use LWP::UserAgent;
 use Data::Dumper qw/Dumper/;
 use lib 'lib';
 use JSON qw/decode_json/;
+use GerhardJ::Config;
 
-sub get_config;
 sub get_lunches;
 sub get_lunch_caps;
 
@@ -13,13 +13,17 @@ my $ua = LWP::UserAgent->new;
 $ua->timeout(10);
 $ua->env_proxy;
 
-my $config = get_config;
-print Dumper $config;
+#GerhardJ::Config::write_dummy_config_ifne;
+my $config = GerhardJ::Config::get_config;
 
 print Dumper get_lunch_caps $config;
 
 sub get_lunches {
-	my ($config) = @_;
+	my ($lunch_server) = @_;
+	
+	unless ($lunch_server) {
+	    $lunch_server = GerhardJ::Config::get_config->{lunch_server};
+    }
 
 	my $response = $ua->get($config->{lunch_server});
  
@@ -44,12 +48,5 @@ sub get_lunch_caps {
 	return \@res;
 }
 
-sub get_config {
-	local $/;
-	open( my $fh, '<', 'config.json' );
-	my $json_text = <$fh>;
-	my $config = decode_json( $json_text );
-	return $config;
-}
 
 #vim: set ts=4:noet:
